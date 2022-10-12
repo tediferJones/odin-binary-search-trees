@@ -1,4 +1,5 @@
 
+// theoretically you should be able to move this function inside the treeClass
 function buildTree(sorted) {
   if (sorted.length === 0) {
     return null;
@@ -43,88 +44,36 @@ function treeClass(arr) {
         return this.insert(value, currentNode.right);
       }
     },
-    delete(value, currentNode=this.root) {
-      // THIS METHOD WONT WORK FOR ROOT NODES
+    deleteV2(value, currentNode=this.root) {
+      /// try to make it recursive
+      if (currentNode === null) {
+        return currentNode;
+      }
 
-      // there are 3 cases for delete
-      // 1.) the node has no children, just make the parent node point to null instead of that node
-      // 2.) the node has 1 child, make parent of node, point to child of node
-      // 3.) the node has 2 children, find the next largest number after node.value, (go right onces, then go left until null, last value of this left tree is next greatest), replace current node, with that node.
-      // with an if else chain statement, order should be 3, 2, 1
-
-      // steps to delete an item
-      // 1.) find the parent of the node whose value is the desired value
-      //    - function findparent(value, currentNode)
-      //      - if (parent.left.value === value || parent.right.value === value) return parent
-      //      - else advance the node, if value < parent search parent.left, else search parent.right
-      // 2.) analyze the grandchildren, determine method
-      //      - node = the node with desired value
-      //      - if 2 children, see method#3
-      //      - if 1 left child, parent.left = parent.node.left
-      //      - if 1 right child, parent.right = parent.node
-      // 3.) execute removal
-      // try to perform these steps in order
-
-
-      function findParentNode(value, currentNode) {
-        // returns the parent of the node with the desired value
-        if (currentNode.left.value === value || currentNode.right.value === value) {
-          // one of the children has the correct value, return the currentNode
-          return currentNode;
-        } else if (!currentNode.left === null || currentNode.right === null) {
-          // this node has no children, so if it hasnt already been found, it doesnt exist
-          return 'value not found'
-        } else {
-          // traverse the tree according to the value
-          if (value < currentNode.value) {
-            // console.log('going left')
-            return findParentNode(value, currentNode.left)
-          } else if (value > currentNode.value) {
-            // console.log('going right')
-            return findParentNode(value, currentNode.right)
-          } else {
-            return 'something has gone terribly wrong'
+      if (value < currentNode.value) {
+        currentNode.left = this.deleteV2(value, currentNode.left)
+      } else if (value > currentNode.value) {
+        currentNode.right = this.deleteV2(value, currentNode.right)
+      } else {
+        // if you've made it this far, currentNode is what you want to delete
+        if (currentNode.left && currentNode.right) {
+          // method#3
+          nextGreatestNode = currentNode.right;
+          while (nextGreatestNode.left) {
+            nextGreatestNode = nextGreatestNode.left;
           }
-        }
-      }
-      // if (value === currentNode.value) {
-        // desiredNode is the currentNode
-      // }
-      let parent = findParentNode(value, currentNode);
-      let desiredNode = null;
-      if (value < parent.value) {
-        desiredNode = parent.left
-      } else {
-        desiredNode = parent.right
-      }
-
-      // determine the strat and execute changes
-      if (desiredNode.left && desiredNode.right) {
-        // method #3, desiredNode has 2 children
-        let nextGreatestNode = desiredNode.right;
-        while (nextGreatestNode.left) {
-          nextGreatestNode = nextGreatestNode.left
-        }
-        this.delete(nextGreatestNode.value);
-        desiredNode.value = nextGreatestNode.value
-
-      } else if (desiredNode.left || desiredNode.right) {
-        // method #2, desiredNode has 1 child
-        childNode = desiredNode.left || desiredNode.right;
-        if (desiredNode.value < parent.value) {
-          parent.left = childNode;
+          this.deleteV2(nextGreatestNode.value)
+          currentNode.value = nextGreatestNode.value
+        } else if (currentNode.left || currentNode.right) {
+          // method#2
+          let temp = currentNode.left || currentNode.right;
+          currentNode = temp
         } else {
-          parent.right = childNode;
-        }
-      } else {
-        // method #1, desiredNode has no children
-        if (value < parent.value) {
-          parent.left = null;
-        } else {
-          parent.right = null;
+          // method#1
+          currentNode = null
         }
       }
-      return
+      return currentNode;
     },
     find(value, currentNode = this.root) {
       if (currentNode === null) {
@@ -145,6 +94,42 @@ function treeClass(arr) {
       // this is gunna be a cluster
       // levelOrder function should be able to take another function as a parameter
       // then test each value in the tree against said function
+      // order the values matters, go from top to bottom, and left to right, dont go down until you have processed all nodes on the same level, then procede to next level
+
+      // consider allowing this function to take a counter as input, start at 0, examine root, counter ++, examine nodes 1 level below root, counter ++, examine all nodes 2 levels below root, etc...
+
+    },
+    inorder() {
+
+    },
+    preorder() {
+
+    },
+    postorder() {
+
+    },
+    height() {
+      // height is the number of edges (not nodes) between this element and its furthest leaf node
+    },
+    depth() {
+      // depth is the number of edges (not nodes) between this element and root
+    },
+    isBalanced() {
+      // A balanced tree is one where the left and right nodes (of every node) have a height difference no greater than 2
+    },
+    rebalance() {
+      // just call getArray() and make a new tree from that
+    },
+    getArray(currentNode=this.root) {
+      if (!currentNode) {
+        return [];
+      }
+      let arr = [];
+      arr.push(currentNode.value);
+      let left = this.getArray(currentNode.left);
+      let right = this.getArray(currentNode.right);
+      
+      return arr.concat(left).concat(right);
     }
   }
 }
@@ -160,13 +145,109 @@ const prettyPrint = (node, prefix = '', isLeft = true) => {
   }
 }
 
-// y = treeClass([7,6,5,4,2,1]);
+y = treeClass([7,6,5,4,3,2,1]) //,4,2,1]);
+prettyPrint(y.root);
+// console.log(y.root.right)
+console.log(y.deleteV2(4))
+prettyPrint(y.root)
+// console.log(y.root)
 // prettyPrint(y.root);
+// console.log(y.getArray())
 
-x = treeClass([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324, 25, 6000]);
-prettyPrint(x.root);
-// console.log(x.delete(6000))
-// console.log(x.delete(25))
-// console.log(x.delete(5))
-console.log(x.find(6345))
+// x = treeClass([1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324, 25, 6000]);
 // prettyPrint(x.root);
+// // console.log(x.delete(6000))
+// // console.log(x.delete(25))
+// // console.log(x.delete(5))
+// // console.log(x.find(6345))
+// // prettyPrint(x.root);
+// console.log(x.getArray());
+
+
+// OLD DELETE FUNCTION
+// delete(value, currentNode=this.root) {
+//   // THIS METHOD WONT WORK FOR ROOT NODES
+
+//   // YOU CAN REPLACE ALL OF THIS WITH, but that is kind of cheating
+//   // buildTree(this.getArray().remove(value));
+
+//   // there are 3 cases for delete
+//   // 1.) the node has no children, just make the parent node point to null instead of that node
+//   // 2.) the node has 1 child, make parent of node, point to child of node
+//   // 3.) the node has 2 children, find the next largest number after node.value, (go right onces, then go left until null, last value of this left tree is next greatest), replace current node, with that node.
+//   // with an if else chain statement, order should be 3, 2, 1
+
+//   // steps to delete an item
+//   // 1.) find the parent of the node whose value is the desired value
+//   //    - function findparent(value, currentNode)
+//   //      - if (parent.left.value === value || parent.right.value === value) return parent
+//   //      - else advance the node, if value < parent search parent.left, else search parent.right
+//   // 2.) analyze the grandchildren, determine method
+//   //      - node = the node with desired value
+//   //      - if 2 children, see method#3
+//   //      - if 1 left child, parent.left = parent.node.left
+//   //      - if 1 right child, parent.right = parent.node
+//   // 3.) execute removal
+//   // try to perform these steps in order
+
+
+//   function findParentNode(value, currentNode) {
+//     // returns the parent of the node with the desired value
+//     if (currentNode.left.value === value || currentNode.right.value === value) {
+//       // one of the children has the correct value, return the currentNode
+//       return currentNode;
+//     } else if (!currentNode.left === null || currentNode.right === null) {
+//       // this node has no children, so if it hasnt already been found, it doesnt exist
+//       return 'value not found'
+//     } else {
+//       // traverse the tree according to the value
+//       if (value < currentNode.value) {
+//         // console.log('going left')
+//         return findParentNode(value, currentNode.left)
+//       } else if (value > currentNode.value) {
+//         // console.log('going right')
+//         return findParentNode(value, currentNode.right)
+//       } else {
+//         return 'something has gone terribly wrong'
+//       }
+//     }
+//   }
+//   // if (value === currentNode.value) {
+//     // desiredNode is the currentNode
+//   // }
+//   let parent = findParentNode(value, currentNode);
+//   let desiredNode = null;
+//   if (value < parent.value) {
+//     desiredNode = parent.left
+//   } else {
+//     desiredNode = parent.right
+//   }
+
+//   // determine the strat and execute changes
+//   if (desiredNode.left && desiredNode.right) {
+//     // method #3, desiredNode has 2 children
+//     let nextGreatestNode = desiredNode.right;
+//     while (nextGreatestNode.left) {
+//       nextGreatestNode = nextGreatestNode.left
+//     }
+//     this.delete(nextGreatestNode.value);
+//     desiredNode.value = nextGreatestNode.value
+
+//   } else if (desiredNode.left || desiredNode.right) {
+//     // method #2, desiredNode has 1 child
+//     childNode = desiredNode.left || desiredNode.right;
+//     if (desiredNode.value < parent.value) {
+//       parent.left = childNode;
+//     } else {
+//       parent.right = childNode;
+//     }
+//   } else {
+//     // method #1, desiredNode has no children
+//     if (value < parent.value) {
+//       parent.left = null;
+//     } else {
+//       parent.right = null;
+//     }
+//   }
+//   return
+// },
