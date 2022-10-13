@@ -90,13 +90,63 @@ function treeClass(arr) {
         return this.find(value, currentNode);
       }
     },
-    levelOrder() {
+    levelOrder(currentNode=this.root) {
+      // THE ANSWER:
+      // https://www.youtube.com/watch?v=H0i3gk1h0lI&ab_channel=Codevolution
+      // YOU NEED TO USE A QUEUE
+      // Queue example: https://jsfiddle.net/h9o7upcw/10/
+
       // this is gunna be a cluster
       // levelOrder function should be able to take another function as a parameter
       // then test each value in the tree against said function
       // order the values matters, go from top to bottom, and left to right, dont go down until you have processed all nodes on the same level, then procede to next level
 
       // consider allowing this function to take a counter as input, start at 0, examine root, counter ++, examine nodes 1 level below root, counter ++, examine all nodes 2 levels below root, etc...
+      // a "print a values on currentLevel" function would be super useful
+      // let left,right;
+      // if (currentNode.left) {
+      //   left = this.levelOrder(currentNode.left);
+      // }
+      // if (currentNode.right) {
+      //   right = this.levelOrder(currentNode.right)
+      // }
+
+      // if node=root, add value to arr
+      // if node.left, add node.left.value to arr
+      // if node.right, add node.right.value to arr
+      // if node.left, levelOrder(node.left)
+      // if node.right, levelOrder(node.right)
+      // return arr
+
+      let arr = left = right = []
+      if (currentNode === this.root) {
+        arr.push(currentNode.value)
+      }
+      // arr.push
+      // if (currentNode.left) {
+      //   arr.push(currentNode.left.value);
+      // }
+      // if (currentNode.right) {
+      //   arr.push(currentNode.right.value);
+      // }
+
+      if (currentNode.left) {
+        left = this.levelOrder(currentNode.left);
+      }
+      if (currentNode.right) {
+        right = this.levelOrder(currentNode.right);
+      }
+      // console.log(arr)
+      console.log(currentNode.value)
+      console.log(arr, left, right)
+      return arr.concat(left).concat(right);
+
+
+      if (currentNode) {
+        arr.push(currentNode.value)
+      }
+
+
 
     },
     inorder() {
@@ -108,17 +158,73 @@ function treeClass(arr) {
     postorder() {
 
     },
-    height() {
+    height(node) {
       // height is the number of edges (not nodes) between this element and its furthest leaf node
+
+      // ISSUE
+      // WHEN GIVEN A NODE WITH ONLY ON CHILD, RETURNS NaN
+      // MORE SPECIFICALLY, IF THE ONLY CHILD IS TO THE RIGHT, FUCKED
+      // IF ONLY CHILD IS TO THE LEFT ITS FINE
+
+      let left = right = 0;
+      if(node.left === null && node.right === null) {
+        return 0;
+      }
+
+      if (node.left) {
+        left = this.height(node.left) + 1;
+      }
+      if (node.right) {
+        right = this.height(node.right) + 1;
+      }
+      return Math.max(left, right);
     },
-    depth() {
+    depth(node, currentNode=this.root, counter=0) {
       // depth is the number of edges (not nodes) between this element and root
+      if (node === currentNode) {
+        return counter
+      }
+      if (node.value < currentNode.value) {
+        counter++;
+        currentNode = currentNode.left;
+        return this.depth(node, currentNode, counter);
+      } else if (node.value > currentNode.left) {
+        counter++;
+        currentNode = currentNode.right;
+        return this.depth(node, currentNode, counter);
+      }
     },
-    isBalanced() {
-      // A balanced tree is one where the left and right nodes (of every node) have a height difference no greater than 2
+    isBalanced(currentNode=this.root, status=true) {
+      // A balanced tree is one where the left and right nodes (of every node) have a height difference no greater than 1
+      // LOOK AT GETARRAY() FOR A SIMPLE WAY TO TRAVERSE ALL NODES
+      if (currentNode.left === null && currentNode.right === null) {
+        return true
+      }
+
+      let leftHeight = (currentNode.left) ? this.height(currentNode.left) : 0;
+      let rightHeight = (currentNode.right) ? this.height(currentNode.right) : 0;
+      if (Math.abs(leftHeight - rightHeight) > 1) {
+        status = false;
+      }
+
+      let left = right = true;
+      if (currentNode.left) {
+        left = this.isBalanced(currentNode.left, status)
+      }
+      if (currentNode.right) {
+        right = this.isBalanced(currentNode.right, status)
+      }
+      // console.log('VALUE: ' + currentNode.value)
+      // console.log(status,left,right)
+      // console.log(`LEFT HEIGHT: ${leftHeight}`)
+      // console.log(`RIGHT HEIGHT: ${rightHeight}`)
+      // console.log('#################################################')
+
+      return status && left && right
     },
     rebalance() {
       // just call getArray() and make a new tree from that
+
     },
     getArray(currentNode=this.root) {
       if (!currentNode) {
@@ -130,6 +236,20 @@ function treeClass(arr) {
       let right = this.getArray(currentNode.right);
       
       return arr.concat(left).concat(right);
+    },
+    printCurrentLevel(level, currentNode=this.root) {
+      let left,right;
+      if (level === 0) {
+        return currentNode.value
+      }
+
+      if (currentNode.left === null && currentNode.right === null) {
+        // currentNode is a leaf
+      }
+
+      if (level > 1) {
+        left = printCurrentLevel();
+      }
     }
   }
 }
@@ -145,11 +265,54 @@ const prettyPrint = (node, prefix = '', isLeft = true) => {
   }
 }
 
-y = treeClass([7,6,5,4,3,2,1]) //,4,2,1]);
-prettyPrint(y.root);
+x = treeClass([1,2,3,4,5,6,7]);
+prettyPrint(x.root)
+console.log(x.levelOrder());
+
+// x = treeClass([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]) //,6,7,8,9,10,11,12,13,14,15]) //,4,5]);
+// prettyPrint(x.root);
+// // // x.insert(0)
+// // // x.insert(-1)
+// x.deleteV2(7)
+// x.deleteV2(5)
+// x.deleteV2(6)
+// x.deleteV2(3)
+// x.deleteV2(2)
+// x.insert(16)
+// // x.deleteV2(1)
+
+// // x.insert(16)
+
+// // x.deleteV2(1)
+
+// // x = treeClass([1,3,2]); //,3]);
+// // x.insert(4)
+// // x.insert(3)
+// // x.deleteV2(1)
+// // console.log(x.height(x.find(2)));
+// // // x.deleteV2(18)
+// prettyPrint(x.root);
+
+// // // console.log(x.getArray());
+// console.log(x.isBalanced());
+
+// x = treeClass([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]);
+// prettyPrint(x.root);
+// x.deleteV2(16)
+// x.deleteV2(18)
+// prettyPrint(x.root);
+
+// console.log(x.getArray());
+// console.log(x.isBalanced());
+// console.log(x.depth(x.find(1)));
+// console.log(x.height(x.find(10)))
+
+
+// y = treeClass([7,6,5,4,3,2,1,2.5]) //,4,2,1]);
+// prettyPrint(y.root);
 // console.log(y.root.right)
-console.log(y.deleteV2(4))
-prettyPrint(y.root)
+// console.log(y.deleteV2(4))
+// prettyPrint(y.root)
 // console.log(y.root)
 // prettyPrint(y.root);
 // console.log(y.getArray())
