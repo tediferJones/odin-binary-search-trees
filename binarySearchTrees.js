@@ -290,14 +290,4 @@ function simpleDriverScript() {
   }
 }
 
-// x = treeClass([25,15,50,10,22,35,70,4,12,18,24,31,44,66,90]); // [1,2,3,4,5,6,7]);
-// prettyPrint(x.root)
 simpleDriverScript();
-// x.delete(4)
-// x.delete(10)
-// x.delete(12)
-// x.delete(24)
-// x.delete(22)
-// prettyPrint(x.root)
-// x.rebalance()
-// prettyPrint(x.root)
